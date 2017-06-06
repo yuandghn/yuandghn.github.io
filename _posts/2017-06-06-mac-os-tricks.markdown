@@ -1,0 +1,17 @@
+---
+layout:     post
+title:      "Mac OS tricks"
+subtitle:   ""
+date:       2017-06-06 22:07:02
+author:     "Echo Yuan"
+header-img: "img/in-post/mac-os-tricks/mac-os-sierra.jpg"
+tags:
+    - MacOS
+---
+1. Command to copy pwd to clipboard: `pwd | pbcopy`
+2. Copy last command to clipboard：`echo "!!" | pbcopy`
+3. [Customize your terminal prompt](http://osxdaily.com/2006/12/11/how-to-customize-your-terminal-prompt/)
+4. [Reattach terminal tab to another window](https://apple.stackexchange.com/questions/14704/reattach-terminal-tab-to-another-window)
+5. Get [Epoch time](https://en.wikipedia.org/wiki/Unix_time) from command line: `date +%s`
+
+

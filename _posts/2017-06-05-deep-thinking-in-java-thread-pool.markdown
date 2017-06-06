@@ -16,26 +16,26 @@ tags:
 #### corePoolSize & maximumPoolSize
 这两个值可不能乱设，不然可能会与你期望的行为完全不一样。
 
-* corePoolSize用于设定thread pool需要时刻保持的最小core threads的数量，即便这些core threads处于空闲状态啥事都不做也不会将它们回收掉，当然前提是你没有设置allowCoreThreadTimeOut为true。至于pool是如何做到保持这些个threads不死的，我们稍后再说。
-* maximumPoolSize用于限定pool中线程数的最大值。
+* corePoolSize  
+  用于设定thread pool需要时刻保持的最小core threads的数量，即便这些core threads处于空闲状态啥事都不做也不会将它们回收掉，当然前提是你没有设置allowCoreThreadTimeOut为true。至于pool是如何做到保持这些个threads不死的，我们稍后再说。
+* maximumPoolSize  
+  用于限定pool中线程数的最大值。如果你自己构造了pool且传入了一个Unbounded的queue且没有设置它的capacity，那么不好意思，最大线程数会永远<=corePoolSize，maximumPoolSize变成了无效的。
 
 #### On-demand construction
-按需构建。
-
-如果让我们来设计如何构建thread pool中的thread的话，大部分人的选择可能都是thread pool一开，马上create core thread到corePoolSize指定的数量；当core threads不够用时，再一个个递增到maximumPoolSize。
-
+按需构建。  
+如果让我们来设计如何构建thread pool中的thread的话，大部分人的选择可能都是thread pool一开，马上create core thread到corePoolSize指定的数量；当core threads不够用时，再一个个递增到maximumPoolSize。  
 然而，Sun's way并非如此。Sun的做法是
 1. 当有新的task submitted时，如果当前pool中core thread的数量<corePoolSize，那么就创建一个新的core thread来处理此次请求并把这个task作为core thread的first task，即使当前正有其他core thread处于idle状态也是如此；
 2. 当core thread的数量>=corePoolSize时，将task放入由整个pool所共享的一个queue中；
 3. 当queue满了后，如果当前thread的数量<maximumPoolSize，那就创建一个新的thread来处理这个task；
 4. 当queue满了且thread的数量也>=maximumPoolSize时，pool会reject掉这个task。有以下几个reject policy可选，当然也可以定义自己的policy。
-    * AbortPolicy
+    * AbortPolicy  
       pool默认的policy，直接抛出一个RuntimeException。
-    * DiscardPolicy
+    * DiscardPolicy  
       啥都不做直接忽略reject行为的一个policy。
-    * DiscardOldestPolicy
+    * DiscardOldestPolicy  
       从queue的头部弹出一个最老的task，然后把当前要处理的这个task塞进去。
-    * CallerRunsPolicy
+    * CallerRunsPolicy  
       由调用者线程来run这个task，pool撒手不管了。
 
 
