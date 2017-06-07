@@ -13,5 +13,6 @@ tags:
 3. [Customize your terminal prompt](http://osxdaily.com/2006/12/11/how-to-customize-your-terminal-prompt/)
 4. [Reattach terminal tab to another window](https://apple.stackexchange.com/questions/14704/reattach-terminal-tab-to-another-window)
 5. Get [Epoch time](https://en.wikipedia.org/wiki/Unix_time) from command line: `date +%s`
+6. Terminal: `Ctrl+A` to jump to the beginning of the current command, and `Ctrl+E` to jump to the end.
 
 
