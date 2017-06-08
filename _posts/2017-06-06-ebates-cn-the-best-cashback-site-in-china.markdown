@@ -11,5 +11,5 @@ tags:
 ---
 ![recent-cashback-events](/img/in-post/bates-cn-the-best-cashback-site-in-china/recent-cashback-events.png)
 
-喂老东家袋盐，:grinning:
+喂老东家袋盐，![grinning](/img/grinning.png)
 

@@ -14,5 +14,6 @@ tags:
 4. [Reattach terminal tab to another window](https://apple.stackexchange.com/questions/14704/reattach-terminal-tab-to-another-window)
 5. Get [Epoch time](https://en.wikipedia.org/wiki/Unix_time) from command line: `date +%s`
 6. Terminal: `Ctrl+A` to jump to the beginning of the current command, and `Ctrl+E` to jump to the end.
+7. By pressing `Fn + Option + Shift + F1/F2`, you can adjust screen brightness by 1/4 frame rather than by one frame as before.
 
 

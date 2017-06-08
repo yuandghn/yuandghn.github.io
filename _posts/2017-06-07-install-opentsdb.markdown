@@ -30,7 +30,7 @@ tags:
     make[1]: Leaving directory `/root/work/opentsdb/opentsdb-2.3.0/build'
     make: *** [all] Error 2
     ```
-    How to resolve:
+    [How to resolve](https://github.com/OpenTSDB/opentsdb/issues/931):
     ```Shell
     rm -rf build
     mkdir build
