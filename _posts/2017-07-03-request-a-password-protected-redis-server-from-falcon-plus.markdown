@@ -10,12 +10,35 @@ tags:
     - Falcon-Plus
     - Redigo
 ---
-在[Falcon+](https://github.com/open-falcon/falcon-plus)的modules中，Judge和Alarm需要与Redis server进行交互，Data source name的配置是简化的：
+在[Falcon+](https://github.com/open-falcon/falcon-plus)的modules中，Judge和Alarm需要与Redis server进行交互，其Data source name的配置是简化的：
 ```
-%%REDIS%%]="127.0.0.1:6379"
+# in config/confgen.sh file
+[%%REDIS%%]="127.0.0.1:6379"
+
+# in config/judge.json file
+"alarm": {
+    "enabled": true,
+    "minInterval": 300,
+    "queuePattern": "event:p%v",
+    "redis": {
+        "dsn": "%%REDIS%%",
+        "maxIdle": 5,
+        "connTimeout": 5000,
+        "readTimeout": 5000,
+        "writeTimeout": 5000
+    }
+}
 ```
-如果Redis server设置了[密码保护](https://redis.io/commands/auth)，那Falcon+就连接不上了。以[Judge](https://github.com/open-falcon/falcon-plus/blob/master/modules/judge/g/redis.go) module的代码为例。
+如果Redis server设置了[密码保护](https://redis.io/commands/auth)，那Falcon+就连接不上了。以[Judge module](https://github.com/open-falcon/falcon-plus/blob/master/modules/judge/g/redis.go)的代码为例。
 ```
+dsn := Config().Alarm.Redis.Dsn
+maxIdle := Config().Alarm.Redis.MaxIdle
+idleTimeout := 240 * time.Second
+
+connTimeout := time.Duration(Config().Alarm.Redis.ConnTimeout) * time.Millisecond
+readTimeout := time.Duration(Config().Alarm.Redis.ReadTimeout) * time.Millisecond
+writeTimeout := time.Duration(Config().Alarm.Redis.WriteTimeout) * time.Millisecond
+
 RedisConnPool = &redis.Pool{
     MaxIdle: maxIdle,
     IdleTimeout: idleTimeout,
