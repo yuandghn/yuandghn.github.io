@@ -71,6 +71,10 @@ tags:
 7. Access the TSD's web interface through [http://127.0.0.1:4242](http://127.0.0.1:4242)
 
     ![opentsdb-web-gui](/img/in-post/install-opentsdb/opentsdb-is-running.png)
+8. Running opentsdb as background job if you want to. Logs will go into nohup.out file.
+```
+nohup ./build/tsdb tsd &
+```
 
 If you want to integrate OpenTSDB with Open-Falcon, please turn it on in the Open-Falcon's transfer.json file.
 ```
