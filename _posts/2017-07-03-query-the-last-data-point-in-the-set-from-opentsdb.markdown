@@ -146,7 +146,9 @@ The last data point取出来了，但是timestamp却并不是我们所期望的�
 ```
 tsd.core.meta.enable_tsuid_tracking = true
 ```
-这是[Metadata](http://opentsdb.net/docs/build/html/user_guide/metadata.html)相关的内容，请自行阅读文档并深入理解。说实话，我自己理解的也不透彻，唯有动手多做些例子来测试下了。和Metadata相关的知识还有[UIDs and TSUIDs](http://opentsdb.net/docs/build/html/user_guide/uids.html)，我们从这些里面应该可以窥见一些OpenTSDB的设计哲学。
+注意此时conf里仍然不包含`tsd.core.meta.enable_realtime_ts`和`tsd.core.meta.enable_tsuid_incrementing`的配置，所以它们俩的默认值都是`false`。
+
+这是[Metadata](http://opentsdb.net/docs/build/html/user_guide/metadata.html)相关的内容，请自行阅读文档并深入理解。说实话，我自己理解的也不透彻，唯有动手多做些例子来测试下了。和Metadata相关的知识还有[UIDs and TSUIDs](http://opentsdb.net/docs/build/html/user_guide/uids.html)。我们从这些里面应该可以窥见一些OpenTSDB的设计哲学。
 
 既然改了配置，那就重新造些测试数据吧~
 
@@ -201,7 +203,7 @@ Response:
 ]
 ```
 
-用api-query-last取出来看看
+用api-query-last取出来看看，在不设置backScan参数的情况下
 
 ```
 POST http://localhost:4242/api/query/last
@@ -295,5 +297,7 @@ POST http://localhost:4242/api/query/last
 }
 ```
 调试出来期望的结果。
+
+暂时没有对`tsd.core.meta.enable_tsuid_incrementing = true`做测试，根据[enabling-metadata](http://opentsdb.net/docs/build/html/user_guide/metadata.html#enabling-metadata)文档里的描述，它对系统性能所造成的影响要比`tsd.core.meta.enable_tsuid_tracking = true`更大。我觉得文档在这一块的描述并不是特别详细，看了好多遍也理解不清楚两个参数设置后对`tsdb-meta`表有什么确切的影响，比如到底会增加几条记录等等。
 
 后续再努力吧~
