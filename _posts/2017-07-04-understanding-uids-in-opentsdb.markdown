@@ -9,7 +9,7 @@ tags:
     - OpenTSDB
     - 翻译
 ---
-只是按照自己的理解翻译一下官方的[UIDs and TSUIDs](http://opentsdb.net/docs/build/html/user_guide/uids.html)文档，限于英文水平，仅做参考。
+只是按照自己的理解翻译一下官方的[UIDs](http://opentsdb.net/docs/build/html/user_guide/uids.html)文档，限于英文水平，仅做参考。
 
 #### UIDs and TSUIDs
 In OpenTSDB, when you write a timeseries data point, it is always associated with a metric and at least one tag name/value pair. Each metric, tag name and tag value is assigned a unique identifier (UID) the first time it is encountered or when explicitly assigned via the API or a CLI tool. The combination of metric and tag name/value pairs create a timeseries UID or TSUID.
@@ -70,24 +70,44 @@ UID对象可以被重命名或删除。重命名操作可以通过CLI(Command Li
 
 Deleting UIDs can be tricky as of version 2.2. Deleting a metric is safe in that users may no longer query for the data and it won't show up in calls to the suggest API. However deleting a tag name or value can cause queries to fail. E.g. if you have time series for the metric sys.cpu.user with hosts web01, web02, web03, etc. and you delete the UID for web02, any query that would scan over data that includes the series sys.cpu.user host=web02 will throw an exception to the user because the data remains in storage. We highly recommend you run an FSCK with a query to repair such issues.
 
-截至2.2版本，删除UID对象是件棘手的事情。删除某个metric UID是安全的行为，因为用户可能不会再对它进行查询而且它也不必出现在[suggest API](http://opentsdb.net/docs/build/html/api_http/suggest.html)的返回中。所谓的suggest API就是查询metric时不用输入完整的内容，这个API会给你提供`auto-complete`的功能并返回与你当前输入的内容相关联的在系统中已存在的metrics。而删除某个tag name/value UID则可能会导致查询失败。为啥会这样呢？想象一下，当你只指定metric来查询时，从`tsdb`表里查到了数据，这些数据是用UID拼起来的，现在要将这些UID转换成对应的string表示，你不得从`tsdb-uid`表中查这个映射关系呀，可是好家伙，其中某个UID对象被你删了，那数据拼不成了呀，tsdb不报错报啥呀。不要狡辩，查询某了已经删除了的metric UID报的错是在`tsdb-uid`表这一层发生的，还没进到`tsdb`表里呢。
+截至2.2版本，删除UID对象是件棘手的事情。删除某个metric UID是安全的行为，因为用户可能不会再对它进行查询而且它也不必出现在[suggest API](http://opentsdb.net/docs/build/html/api_http/suggest.html)的返回中。所谓的suggest API就是查询metric时不用输入完整的内容，这个API会给你提供`auto-complete`的功能并返回与你当前输入的内容相关联的在系统中已存在的metrics。而删除某个tag name/value UID则可能会导致查询失败。为啥会这样呢？想象一下，当你只指定metric来查询时，从`tsdb`表里查到了包含tags的数据，这些数据是用UID拼起来的，现在要将这些UID转换成对应的string表示，你不得从`tsdb-uid`表中查这个映射关系呀，可是好家伙，其中某个UID对象被你删了，那数据拼不成了呀，tsdb不报错报啥呀。不要狡辩，查询某个已经删除了的metric UID报的错是在`tsdb-uid`表这一层发生的，还没进到`tsdb`表里呢。
 
 Why UIDs? 为啥要用UID呢？
 
 This question is asked often enough it's worth laying out the reasons here. Looking up or assigning a UID takes up precious cycles in the TSD so folks wonder if it wouldn't be faster to use the raw name of the metric or computer a hash. Indeed, from a write perspective it would be slightly faster, but there are a number of drawbacks that become apparent.
 
-这问题老生常谈了，看来有必要在这把原因说明白。
+这个问题经常被问到，看来有必要在这把原因说明白。查找或赋值一个UID会占用TSD宝贵的cycles，所以人们想知道使用原生的字符串或计算一个Hash值是否会更快些。的确，从写入的角度上来看这样会稍微快些，但是也有一些明显的缺点。
 
-Raw Names
+##### Raw Names 原生字符串
+
 Since OpenTSDB uses HBase as the storage layer, you could use strings as the row key. Following the current schema, you may have a row key that looked like sys.cpu.0.user 1292148000 host=websv01.lga.mysite.com owner=operations. Ordering would be similar to the existing schema, but now you're using up 70 bytes of storage each hour instead of 19. Additionally, the row key must be written and returned with every query to HBase, so you're increasing your network usage as well. So resorting to UIDs can help save space.
 
-Hashes
+OpenTSDB使用HBase作为存储层，因此你当然可以使用字符串作为row key。以这种方式举例，假设你有一个row key长这样`sys.cpu.0.user 1292148000 host=websv01.lga.mysite.com owner=operations`，排序方式还跟原来的UID一样，但是你的row key此时却必须以70个字节(row key总共70个字符，每个字符一个字节)来存储，而原来只需要19个字节((metric * 1 + tagk * 2 + tagv * 2) * 3 + timestamp * 1 * 4 = 19)。此外，每次查询，这个row key都要在HBase中写入和返回，无端增加了你的网络消耗。所以，使用UID可以帮助你节约存储空间。
+
+##### Hashes
+
 Another idea is to simply bump up the UIDs to 4 bytes then calculate a hash on the strings and store the hash with forward and reverse maps as we currently do. This would certainly reduce the amount of time it takes to assign a UID, but there are a few problems. First, you will encounter collisions where different names return the same hash. You could try different algorithms and even try increasing the hash to 8 bytes, but you'll always have the issue of colliding hashes. Second, you are now adding a hash calculation to every data put since it would have to determine the hash, then lookup the hash in the UID table to see if it's been mapped yet. Right now, each data point only performs the lookup. Third, you can't pre-split your HBase regions as easily. If you know you will have roughly 800 metrics in your system (the tags are irrelevant for this purpose), you can pre-split your HBase table to evenly distribute those 800 metrics and increase your initial write performance.
 
-TSUIDs
+另一个主意是把UID提升到4个字节(为啥是4个字节，我想应该是由于在Java中hashcode()方法返回的是一个int值吧)并为string计算出一个Hash值，然后再像我们现在所做的那样存储Hash<-->string的双向映射关系。这确实可以减少赋值UID这个过程所花费的时间，但是却有一些其他的问题。首先你会碰到Hash碰撞/冲突的情况当不同的name返回相同的Hash值的情况下。你可能想着可以尝试不同的算法甚至将Hash的存储再提升到8个字节，但是你始终无法避免会遇到这个问题。
+
+##### TSUIDs
+
 When a data point is written to OpenTSDB, the row key is formatted as <metric_UID><timestamp><tagk1_UID><tagv1_UID>[...<tagkN_UID><tagvN_UID>]. By simply dropping the timestamp from the row key, we have a long array of UIDs that combined, form a unique timeseries ID. Encoding the bytes as a hex string will give us a useful TSUID that can be passed around various API calls. Thus from our UID example above where each metric, tag name and value has a UID of 1, our TSUID, encoded as a hexadecimal string, would be 000001000001000001.
+
+当一个data point写入到OpenTSDB中时，它的row key的形式是`<metric_UID><timestamp><tagk1_UID><tagv1_UID>[...<tagkN_UID><tagvN_UID>]`。简单地从其中移除掉timestamp后，我们得到一个长长的UID数组的组合，这也就是我们所说的unique timeseries ID。将这些字节编码成十六进制的字符串后我们可以得到一个可以用于各种API调用的TSUID。拿最开头的那个例子来说，我们的TSUID就是这样一个十六进制的字符串`000001000001000001`。
 
 While this TSUID format may be long and ugly, particularly with all of the 0s for early UIDs, there are a few reasons why this is useful:
 
-If you know the width of each UID (by default 3 bytes as stated above), then you can easily parse the UID for each metric, tag name and value from the UID string.
-Assigning a unique numeric ID for each timeseries creates issues with lock contention and/or synchronization issues where a timeseries may be missed if the UID could not be incremented.
+虽然这样的TSUID格式有点儿丑长，前面还有老多前置0填充，但它实际用起来还是蛮适合的：
+
+* If you know the width of each UID (by default 3 bytes as stated above), then you can easily parse the UID for each metric, tag name and value from the UID string.
+
+  如果你知道每个UID的宽度(默认是3个字节哦我们前面说过)，那么你就可以轻松地从一个UID字符串中分离解析出来metric UID和每个tag name UID、tag value UID。
+
+* Assigning a unique numeric ID for each timeseries creates issues with lock contention and/or synchronization issues where a timeseries may be missed if the UID could not be incremented.
+
+  为每个timeseries分配一个unique numeric ID的方式可能会带来锁竞争和/或同步的问题当unique numeric ID无法自增的时候，并最终可能会导致这个timeseries遗失。
+
+不知道在某些地方有没有曲解作者要表达的意思，如果有，请一定告知我，:)
+
+
