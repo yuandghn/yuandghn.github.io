@@ -38,10 +38,10 @@ kramdown:
   input: GFM                            # use Github Flavored Markdown !important
 
 # Disqus settings
-#disqus_username: echoyuan-me
+disqus_username: echoyuan-me
 
 # NetEase cloud tie settings
-netease_cloud_tie: 'f6ed97fb3c034176b8d2344b36b041ff'
+#netease_cloud_tie: 'f6ed97fb3c034176b8d2344b36b041ff'
 
 # Analytics settings
 # Baidu Analytics
