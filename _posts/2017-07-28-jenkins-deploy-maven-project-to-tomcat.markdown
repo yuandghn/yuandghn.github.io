@@ -10,7 +10,7 @@ tags:
     - Maven
     - Tomcat
 ---
-1. 安装[`Deploy to container Plugin`](https://wiki.jenkins.io/display/JENKINS/Deploy+Plugin) 到Jenkins里，虽然plugin描述里说只支持到Tomcat 7.x，其实Tomcat 8也没问题。
+1. 安装[`Deploy to container Plugin`](https://wiki.jenkins.io/display/JENKINS/Deploy+Plugin) 到Jenkins里，虽然plugin的描述里说只支持到Tomcat 7.x，其实Tomcat 8也没问题。
 
 2. 左边菜单`New item` -> 输入item name -> Freestyle project
 
@@ -37,7 +37,7 @@ tags:
 
     添加个`Invoke top-level Maven target`的build step，`Goals`里输入`clean package`，我们仅仅打个新包。
 
-    好像跳过了`Maven Version`？不，这项设置是很重要的，而且花了好几个小时来搜索和验证。我们先按已知的结果来设置，挖个坑，后面专门写一篇文章来介绍。
+    好像跳过了`Maven Version`？不，这项设置是很重要的，而且花了好几个小时来搜索和验证。我们先按已知的结果来设置，挖个坑，后面专门写一篇[文章](/2017/07/29/jenkins-cannot-run-program-mvn-error-2-no-such-file-or-directory/)来介绍。
 
     转到`Manage Jenkins` -> `Global Tool Configuration`里，点击`Maven installations...`，然后添加一个Jenkins所在机器上的本地Maven的引用。这一步其实应该在`New item`之前就做掉的。
 
@@ -45,18 +45,22 @@ tags:
 
     记得要先把`Install automatically`给uncheck掉才会出现`MAVEN_HOME`的输入框哦！
 
-    现在，`Build` -> `Maven version`就可以选择到它了。
+    现在，`Build` -> `Maven version`里就可以选择到`maven-3.3.9`了，不要选`(Default)`。
 
 7. `Post-build Actions`
 
-    添加一个`Deploy war/ear to a container`的action，`WAR/EAR files`里指定成`target/demo-project.war`，`Context path`根据你的需求来定，`Containers`里输入Tomcat里配置的manager的username和password，URL指定到Tomcat的端口那里即可。
+    添加一个`Deploy war/ear to a container`的action，`WAR/EAR files`里指定成`target/demo-project.war`，`Context path`根据你的需求来定，`Containers`里输入Tomcat里配置的username和password，URL指定到Tomcat的端口那里即可。
 
-    同时，Tomcat的配置文件里也要进行些设置，否则Jenkins无法将war包部署到remote Tomcat里。
+    同时，Tomcat的配置文件里也要做些Authentication的设置，否则Jenkins无法将war包部署到remote Tomcat里。
 
-    * 给你使用的username赋予manager的角色权限，以下是个例子
+    * 给你使用的username赋予`manager-script`角色的权限
+
+        这个角色的含义是`allows access to the text interface and the status pages`。有时候觉得自己关于Tomcat的知识好匮乏，平常用的都是一些相当皮毛、肤浅的知识。再给自己挖个坑，后面深入地去了解下。
+
+        以下是个例子
         ```
         <-- file: tomcat-dir/conf/tomcat-users.xml -->
-        <user username="tomcat" password="tomcat" roles="manager-gui,manager-script"/>
+        <user username="tomcat" password="tomcat" roles="manager-script"/>
         ```
     * 添加Jenkins所在机器的IP到Tomcat允许的Remote addrs里
         ```
@@ -65,6 +69,8 @@ tags:
           <Valve className="org.apache.catalina.valves.RemoteAddrValve"
                  allow="127\.\d+\.\d+\.\d+|your-jenkins-server's-ip|::1|0:0:0:0:0:0:0:1" />
         ```
+
+     这种方式可行，但不一定是最佳的，毕竟要开放Tomcat的manager权限，这可能会带来一些安全隐患。我想比较理想的方式应该是通过脚本或某种系统将war包分发到各个Tomcat，然后重启生效。
 
 8. `Save` & `Build Now`，看看能否部署成功。
 
