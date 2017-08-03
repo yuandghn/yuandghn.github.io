@@ -72,6 +72,10 @@ tags:
 
      这种方式可行，但不一定是最佳的，毕竟要开放Tomcat的manager权限，这可能会带来一些安全隐患。我想比较理想的方式应该是通过脚本或某种系统将war包分发到各个Tomcat，然后重启生效。
 
+     虽然目前不知道这个`Deploy to container Plugin`插件是怎么stop并start Tomcat的，但是有时会碰到无法真正restart Tomcat的情况，这时候插件就无能为力了，还得自己写脚本来强行kill掉Tomcat并重新启动，具体参看另一篇[文章](/2017/07/30/i-know-very-little-about-tomcat/)里的`How to force the Tomcat to shutdown?`小节。
+
+     自己写脚本来替代`Deploy to container Plugin`插件的工作可能需要用到SSH & SCP免密登录Linux服务器的功能，自己也转载了一篇写的挺好的[博文](/2017/08/02/linux-ssh-or-scp-without-typing-password/)。
+
 8. `Save` & `Build Now`，看看能否部署成功。
 
 

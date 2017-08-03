@@ -29,13 +29,14 @@ tags:
     ```
     CATALINA_PID="/tmp/catalina.pid"
     ```
-    用于存储Tomcat的PID，路径和文件名可以根据自己的需求来定。以后想强制Tomcat shutdown就可以执行以下命令了。
+    用于存储Tomcat的PID，路径和文件名可以根据自己的需求来定。以后想强行shutdown Tomcat就可以执行以下命令了。
     ```
     sh ./bin/catalina.sh stop 15 -force
     ```
     我这的输出如下
     ```
     ......
+    Using CATALINA_PID:    /tmp/catalina.pid
     The stop command failed. Attempting to signal the process to stop through OS signal.
     Tomcat did not stop in time.
     To aid diagnostics a thread dump has been written to standard out.
@@ -43,7 +44,7 @@ tags:
     The Tomcat process has been killed.
     ```
 
-    `stop`指令后面的参数的单位是秒，作用是给予Tomcat一定的时间来做清理工作，这个时间一到才会被强制shutdown。`-force`的作用不说也明了。
+    `stop`指令后面的参数的单位是秒，作用是给予Tomcat一定的时间来做清理工作，这个时间一到才会被强行shutdown。`-force`的作用不说也明了。
 
     关于`CATALINA_PID`的描述
     > Path of the file which should contains the pid of the catalina startup java process, when start (fork) is used
