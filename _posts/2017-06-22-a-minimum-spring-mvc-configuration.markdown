@@ -11,7 +11,7 @@ tags:
 ---
 在本地起一个基于[Spring MVC](http://docs.spring.io/spring/docs/current/spring-framework-reference/htmlsingle/#spring-web)的Web项目的最小化配置，使用[Maven](http://maven.apache.org/)作为项目管理工具。
 
-首先使用Intellij IDEA创建一个maven-archetype-webapp项目，在pom.xml文件中加入Spring MVC的相关依赖，以下是一小片段。
+首先使用IntelliJ IDEA创建一个maven-archetype-webapp项目，在pom.xml文件中加入Spring MVC的相关依赖，以下是一小片段。
 ```
 <properties>
     <spring.version>4.2.7.RELEASE</spring.version>
