@@ -65,9 +65,9 @@ featured-condition-size: 1              # A tag will be featured if the size of 
 
 
 # Friends
-friends: [
-    {
-        title: "小琐的小碎",
-        href: "http://sun0905.me"
-    }
-]
+#friends: [
+ #   {
+  #      title: "小琐的小碎",
+   #     href: "http://sun0905.me"
+    #}
+#]
