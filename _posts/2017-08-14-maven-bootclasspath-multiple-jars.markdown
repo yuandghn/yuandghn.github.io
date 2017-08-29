@@ -87,4 +87,12 @@ Caused by: org.apache.maven.plugin.compiler.CompilationFailureException: Compila
 
 修改后，编译果然通过了。
 
-类比一下，在Windows中设置PATH时各项之间是以`;`来分隔的，而在Linux中是以`:`来分隔的。
+但是，这事儿不能每次都靠手工来改呀，咱要自动的！所以，这时候Java的`system properties`中的`path.separator`就有用处了。
+
+```
+<bootclasspath>
+    ${java.home}\lib\rt.jar${path.separator}${java.home}\lib\jce.jar
+</bootclasspath>
+```
+
+效果杠杠的~
