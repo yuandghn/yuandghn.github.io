@@ -115,11 +115,9 @@ mvn clean package -P qa
 
 注意到我把filter的相关配置注释掉了吗？因为在这里filter不太好用，它需要明确地指出要使用哪些property file且不能使用通配符来模糊匹配，既然property files也会被拷贝到输出目录，那还是使用Spring的`PropertyPlaceholderConfigurer`来做这件事吧。
 
-我个人不太建议在pom.xml中指定默认的profile
-```
-<activation>
-    <activeByDefault>true</activeByDefault>
-</activation>
-```
+按我们现在的配置，你必须指定一个profile作为`activeByDefault`，不然会在copy web resources的时候报错，因为会找不到这个目录`<directory>src/main/filters/${target-env}</directory>`。
 
-而是应该在`src/main/resources`目录下放置项目使用的所有默认的配置文件，只有当真正需要打特定环境的包时再使用`-P`参数来指定profile。
+话说，某天突发一想法，即pom.xml中的pom指代的是什么意思呢？[官网](https://maven.apache.org/guides/introduction/introduction-to-the-pom.html)上就有介绍
+> What is a POM?
+
+> A `Project Object Model` or POM is the fundamental unit of work in Maven.
