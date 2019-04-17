@@ -49,7 +49,7 @@ Zipkin提供了各个语言的用于收集数据的官方的或社区的[instrum
 git clone https://github.com/openzipkin/brave-webmvc-example.git
 ```
 
-里面有两个Maven工程分别对应Servlet2.5和Servlet3，我们将Servlet3导入Intellij IDEA并运行一下就可以看到效果。
+[里面](https://github.com/openzipkin/brave-webmvc-example)有两个Maven工程分别对应Servlet2.5和Servlet3，我们将Servlet3导入Intellij IDEA并运行一下就可以看到效果。
 
 这个例子很简单，但是全部都是用注解来做的，相对来说还是基于XML的Configuration看着亲切些，因为我们能更轻易地了解和掌控全局配置。
 
@@ -76,6 +76,15 @@ Just do IT.
     <artifactId>brave-spring-beans</artifactId>
     <version>${brave.version}</version>
 </dependency>
+```
+
+```
+{
+	"code":"ACCESS_DENIED",
+	"message":"Server access denied",
+	"data":null,
+	"extra":"extra placed if need"
+}
 ```
 
 按照文档里的说明，我们定义一下各个bean
