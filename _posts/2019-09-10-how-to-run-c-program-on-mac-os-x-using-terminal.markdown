@@ -32,3 +32,8 @@ gcc sum_2_nums.c -o sum_2_nums
 cc sum_2_nums.c -o sum_2_nums
 ./sum_2_nums.out
 ``` 
+
+---
+编译失败时的错误提示还是蛮精确的：
+
+![gcc-error-tips](/img/in-post/how-to-run-c-program-on-mac-os-x-using-terminal/gcc-error-tips.png)
