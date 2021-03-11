@@ -12,6 +12,7 @@ tags:
 
 ```c
 #include <stdio.h>
+
 int main(void)
 {
     int n1, n2, result;
@@ -45,4 +46,5 @@ cc sum_2_nums.c -o sum_2_nums
 gcc -lstdc++ hello.cpp -o hello
 ```
 The `-lstdc++` flag tells the linker to include the C++ Standard Library
+
 参考自：[https://stackoverflow.com/questions/11852568/gcc-4-8-on-mac-os-x-10-8-throws-undefined-symbols-for-architecture-x86-64?#answer-11975663](https://stackoverflow.com/questions/11852568/gcc-4-8-on-mac-os-x-10-8-throws-undefined-symbols-for-architecture-x86-64?#answer-11975663)
