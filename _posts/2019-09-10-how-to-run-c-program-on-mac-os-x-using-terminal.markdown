@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      "How to run C program on Mac os x using terminal"
+title:      "How to run C/C++ program on Mac os x using terminal"
 subtitle:   ""
 date:       2019-09-10 22:21:00
 author:     "Echo Yuan"
@@ -37,3 +37,12 @@ cc sum_2_nums.c -o sum_2_nums
 编译失败时的错误提示还是蛮精确的：
 
 ![gcc-error-tips](/img/in-post/how-to-run-c-program-on-mac-os-x-using-terminal/gcc-error-tips.png)
+
+<hr/>
+
+运行C++程序稍微有点儿不同
+```
+gcc -lstdc++ hello.cpp -o hello
+```
+The `-lstdc++` flag tells the linker to include the C++ Standard Library
+参考自：[https://stackoverflow.com/questions/11852568/gcc-4-8-on-mac-os-x-10-8-throws-undefined-symbols-for-architecture-x86-64?#answer-11975663](https://stackoverflow.com/questions/11852568/gcc-4-8-on-mac-os-x-10-8-throws-undefined-symbols-for-architecture-x86-64?#answer-11975663)
