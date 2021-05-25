@@ -13,7 +13,7 @@ tags:
 经过一番搜索和实践，得出了一点儿经验。
 
 ##### 先定义Mapping
-```json
+```
 PUT /span_not_query_test
 
 {
@@ -28,7 +28,7 @@ PUT /span_not_query_test
 ```
 
 ##### 造两条数据
-```json
+```
 PUT /span_not_query_test/_doc/1
 
 {
@@ -43,7 +43,7 @@ PUT /span_not_query_test/_doc/2
 ```
 
 ##### 例子1
-```json
+```
 POST /span_not_query_test/_search
 
 {
