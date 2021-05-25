@@ -5,7 +5,7 @@ subtitle:   ""
 date:       2021-05-25 16:00:00
 author:     "Echo Yuan"
 tags:
-    - Elasticsearchs
+    - Elasticsearch
     - span not query
 ---
 最近在学习Elasticsearch，在看到[span not](https://www.elastic.co/guide/en/elasticsearch/reference/7.2/query-dsl-span-not-query.html) query的时候一头雾水，官方也没给出更详细的例子。如鲠在喉，难受。
