@@ -125,5 +125,5 @@ POST /span_not_query_test/_search
 当然，最好的方式还是去看Elasticsearch和Lucene的`SpanNotQuery`的源码。
 
 ##### 参考资料
-[https://stackoverflow.com/questions/24260103/spannotquery-giving-unexpected-results-exclude-is-ignored](https://stackoverflow.com/questions/24260103/spannotquery-giving-unexpected-results-exclude-is-ignored)
-[https://elasticsearch.cn/article/13677](https://elasticsearch.cn/article/13677)
+1. [https://stackoverflow.com/questions/24260103/spannotquery-giving-unexpected-results-exclude-is-ignored](https://stackoverflow.com/questions/24260103/spannotquery-giving-unexpected-results-exclude-is-ignored)
+2. [https://elasticsearch.cn/article/13677](https://elasticsearch.cn/article/13677)
