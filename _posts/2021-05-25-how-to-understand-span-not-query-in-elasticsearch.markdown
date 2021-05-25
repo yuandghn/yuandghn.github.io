@@ -72,7 +72,7 @@ POST /span_not_query_test/_search
 `exclude.span_term.content.value` == `quick`，无文档返回；否则，会返回两个文档。
 
 ##### 例子2
-```json
+```
 POST /span_not_query_test/_search
 
 {
@@ -121,6 +121,8 @@ POST /span_not_query_test/_search
 结论：
 
 `exclude`和`must_not`的工作方式不一样，它并不会把符合自身条件的docs查询出来然后再从`include`的结果中remove掉它们，而只是在条件这一层面上判断是否包含在`include`的条件范围内。
+
+当然，最好的方式还是去看Elasticsearch和Lucene的`SpanNotQuery`的源码。
 
 ##### 参考资料
 [https://stackoverflow.com/questions/24260103/spannotquery-giving-unexpected-results-exclude-is-ignored](https://stackoverflow.com/questions/24260103/spannotquery-giving-unexpected-results-exclude-is-ignored)
