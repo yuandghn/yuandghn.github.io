@@ -8,6 +8,4 @@ tags:
     - Elastic Certified Engineer
 ---
 
-![](https://api.accredible.com/v1/frontend/credential_website_embed_image/badge/34584573)
-
 ![](https://api.accredible.com/v1/frontend/credential_website_embed_image/certificate/34584573)
