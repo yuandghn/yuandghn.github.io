@@ -9,4 +9,4 @@ tags:
 ---
 ![intellij-idea-enable-JMX-agent](/img/in-post/spring-boos-actuator/intellij-idea-enable-JMX-agent.png)
 
-![health-component-hierarchy](/img/in-post/spring-boos-actuator/health-component-hierarchy.png.png)
+![health-component-hierarchy](/img/in-post/spring-boos-actuator/health-component-hierarchy.png)
