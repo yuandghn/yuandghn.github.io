@@ -30,7 +30,7 @@ Spring Boot Version: 2.3.9.RELEASE
 ### Web Endpoints
 那都有哪些内置的Web Endpoints呢，Actuator贴心地提供了一个`discovery page`，默认情况下你可以通过`{contextPath}/actuator`来查看。
 
-```json
+```javascript
 {
   "_links": {
     "self": {
@@ -79,7 +79,7 @@ Health Endpoint返回的信息繁简与否，取决于以下两个属性的配�
 
 我们将`management.endpoint.health.show-details`设置为`always `。目前demo项目里只引入了`spring-boot-starter-amqp`的依赖，所以`/demo/actuator/health`的返回如下
 
-```json
+```javascript
 {
   "status": "UP",
   "components": {
@@ -134,7 +134,7 @@ public class RandomHealthIndicator implements HealthIndicator {
 
 这时再看看`/demo/actuator/health`的返回
 
-```json
+```javascript
 {
   "status": "UP",
   "components": {
@@ -168,7 +168,7 @@ public class RandomHealthIndicator implements HealthIndicator {
 ```
 如期出现。也可以访问某个具体的indicator，比如我们刚刚创建的`/demo/actuator/health/random`
 
-```json
+```javascript
 {
   "status": "UP",
   "details": {
@@ -260,7 +260,7 @@ HealthComponent有三种：`Health`、`CompositeHealth`、`SystemHealth`。
 
 看一下我们测量的效果
 
-```json
+```javascript
 {
   "status": "UP",
   "components": {
