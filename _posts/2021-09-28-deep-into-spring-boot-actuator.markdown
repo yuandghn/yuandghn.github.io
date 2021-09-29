@@ -348,7 +348,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
 
 `management.health.defaults.enabled: false`会使所有内置的Health Contributors不再自动注册为Spring beans，也就直接导致了`/actuator/health`无兵(bean)可用。它是通过`ConditionalOnEnabledHealthIndicator`注解在auto configuration阶段做到的，具体可参考一下`DataSourceHealthContributorAutoConfiguration`的源码。
 
-如果你自定义了Health Indicator，那最好也给它加上`ConditionalOnEnabledHealthIndicator`注解，不然它就脱离`management.health.defaults.enabled: false`的控制了，这个[unit test](https://github.com/spring-projects/spring-boot/blob/2.3.x/spring-boot-project/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/health/HealthContributorAutoConfigurationTests.java)对此有所演示。
+如果你自定义了Health Indicator，那最好也给它加上`ConditionalOnEnabledHealthIndicator`注解，不然它就脱离`management.health.defaults.enabled: false`的控制了，这个[Unit Test](https://github.com/spring-projects/spring-boot/blob/2.3.x/spring-boot-project/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/health/HealthContributorAutoConfigurationTests.java)对此有所演示。
 
 ##### Q1 - 应用是在本地直接起的，怎样可以使这两个Health Groups也可用？
 设置`management.endpoint.health.probes.enabled`为`true`
