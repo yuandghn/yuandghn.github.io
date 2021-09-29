@@ -342,14 +342,20 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
 
 > In general, the "Liveness" state should not be based on external checks, such as `Health checks`. If it did, a failing external system (a database, a Web API, an external cache) would trigger massive restarts and cascading failures across the platform.
 
-依据官方的说明，使用`/actuator/health`作为probes并不是一个好的实践，前面我们也有讲它可能会变成一个较为耗时的操作。
+依据官方的说明，使用`/actuator/health`作为probe并不是一个好的实践，前面我们也有讲它可能会变成一个较为耗时的操作，且受网络波动的影响你的应用也会变得时好时坏、难以捉摸。
+
+如果你仍然想继续用`/actuator/health`或者因为Spring Boot版本小于2.3.9，那么把`management.health.defaults.enabled`设置为`false`可能会是个好的选择，以此来保证`/actuator/health`的网络联通性但又不会去做任何health check的操作，这其实和你自己写一个空的`handler method`没什么区别。
+
+`management.health.defaults.enabled: false`会使所有内置的Health Contributors不再自动注册为Spring beans，也就直接导致了`/actuator/health`无兵(bean)可用。它是通过`ConditionalOnEnabledHealthIndicator`注解在auto configuration阶段做到的，具体可参考一下`DataSourceHealthContributorAutoConfiguration`的源码。
+
+如果你自定义了Health Indicator，那最好也给它加上`ConditionalOnEnabledHealthIndicator`注解，不然它就脱离`management.health.defaults.enabled: false`的控制了，这个[unit test](https://github.com/spring-projects/spring-boot/blob/2.3.x/spring-boot-project/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/health/HealthContributorAutoConfigurationTests.java)对此有所演示。
 
 ##### Q1 - 应用是在本地直接起的，怎样可以使这两个Health Groups也可用？
 设置`management.endpoint.health.probes.enabled`为`true`
 ##### Q2 - 应用是怎样auto-detects到身处Kubernetes环境中的？
-其实很简单，文档请参考[这里](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/deployment.html#cloud-deployment-kubernetes)，代码请参考`AvailabilityProbesAutoConfiguration`，在这里决定是否创建`livenessStateHealthIndicator`、`readinessStateHealthIndicator`以及两个Health Groups`liveness`、`readiness`，也是在这个地方(ProbesCondition)判断当前环境是不是Kubernetes的。
+其实很简单，文档请参考[cloud-deployment-kubernetes](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/deployment.html#cloud-deployment-kubernetes)，代码请参考`AvailabilityProbesAutoConfiguration`，在这里决定是否创建`livenessStateHealthIndicator`、`readinessStateHealthIndicator`以及两个Health Groups`liveness`、`readiness`，也是在这个地方(ProbesCondition)判断当前环境是不是Kubernetes的。
 ##### Q3 - 如何主动改变Application Availability State？
-在你的程序里可以使用这个便捷的静态方法`AvailabilityChangeEvent.publish`来发布新的availability state，只要拿到`ApplicationEventPublisher`这个Bean就行。
+在你的程序里可以使用`AvailabilityChangeEvent.publish`这个便捷的静态方法来发布新的availability state，只要拿到`ApplicationEventPublisher`Bean就行。
 
 ### JMX Tips
 如果你用IDEA在本地调试的过程中发现JMX Endpoint不知怎地被启用了，那可能是IDEA的锅
