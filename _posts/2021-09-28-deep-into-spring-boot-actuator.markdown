@@ -7,9 +7,11 @@ author:     "Echo Yuan"
 tags:
     - Spring Boot Actuator
 ---
-Spring Boot Actuator现在已经几乎成为了应用的标配模块，本文试图在某些方面对其做一些深入的了解。
+Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依赖了它，应用就会自动加持`/actuator/health`，然后就可以给容器探测了。这一切看起来似乎是很简单很自然的事情，可你真的对它了解吗？本文就试图对这个Health Endpoint做一些深入的剖析。
 
-Spring Boot Version: 2.3.9.RELEASE
+事情的起因也是日常工作中常见的“套路”。远程环境的某个服务之前一直好好的，最近却经常被k8s重启，排查后发现是`/actuator/health`超时了，而本地开发环境却依然秒回。接着挖，发现是应用要发邮件，所以依赖了`spring-boot-starter-mail`，而mail的测试账号是临时申请的126邮箱，跨国的网络通信使`/actuator/health`不能如期返回。
+
+本文使用的Spring Boot Version: 2.3.9.RELEASE
 
 ### Endpoints
 先贴一段[官方文档](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/production-ready-features.html#production-ready)的描述
@@ -60,7 +62,7 @@ Spring Boot Version: 2.3.9.RELEASE
 ```
 
 ### Health Information
-这个Health Endpoint会作为下文重点讲述的对象。它的结果是对应用里所有已注册的HealthIndicators的结果的聚合，那既然是聚合的结果，可能会花费一些时间才能获得。
+这个Health Endpoint就是本文重点讲述的对象。它的结果是对应用里所有已注册的HealthIndicators的结果的聚合，那既然是聚合的结果，可能会花费一些时间才能获得。
 
 Health Endpoint返回的信息繁简与否，取决于以下两个属性的配置
 
@@ -335,6 +337,33 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
 ```
 它封装了Health实例的创建和异常处理，相比之下，我们前面定义的`RandomHealthIndicator`表现的就有点儿差了。
 
+最后再来看一下MailHealthIndicator，也就是那个让我们的应用超时的“恐怖”分子
+```java
+/**
+ * {@link HealthIndicator} for configured smtp server(s).
+ *
+ * @author Johannes Edmeier
+ * @since 2.0.0
+ */
+public class MailHealthIndicator extends AbstractHealthIndicator {
+
+	private final JavaMailSenderImpl mailSender;
+
+	public MailHealthIndicator(JavaMailSenderImpl mailSender) {
+		super("Mail health check failed");
+		this.mailSender = mailSender;
+	}
+
+	@Override
+	protected void doHealthCheck(Builder builder) throws Exception {
+		builder.withDetail("location", this.mailSender.getHost() + ":" + this.mailSender.getPort());
+		this.mailSender.testConnection();
+		builder.up();
+	}
+
+}
+```
+
 ### Kubernetes Probes
 为了让应用更适应容器化环境，Spring Boot从2.3起提供了开箱即用的[探针技术](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.3-Release-Notes#liveness-and-readiness-probes)来暴露应用程序的可用性状态([Application Availability State](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/spring-boot-features.html#boot-features-application-availability))。
 
@@ -345,6 +374,8 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
 依据官方的说明，使用`/actuator/health`作为probe并不是一个好的实践，前面我们也有讲它可能会变成一个较为耗时的操作，且受网络波动的影响你的应用也会变得时好时坏、难以捉摸。
 
 如果你仍然想继续用`/actuator/health`或者因为Spring Boot版本小于2.3.9，那么把`management.health.defaults.enabled`设置为`false`可能会是个好的选择，以此来保证`/actuator/health`的网络联通性但又不会去做任何health check的操作，这其实和你自己写一个空的`handler method`没什么区别。
+
+如果你还是想让它做一些实际的health check操作，但又希望把其中一些检查项排除在外，可以单独设置这些项的启用，比如`management.health.mail.enabled: false`。
 
 `management.health.defaults.enabled: false`会使所有内置的Health Contributors不再自动注册为Spring beans，也就直接导致了`/actuator/health`无兵(bean)可用。它是通过`ConditionalOnEnabledHealthIndicator`注解在auto configuration阶段做到的，具体可参考一下`DataSourceHealthContributorAutoConfiguration`的源码。
 
