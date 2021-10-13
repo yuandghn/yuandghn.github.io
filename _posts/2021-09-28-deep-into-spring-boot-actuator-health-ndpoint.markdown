@@ -1,11 +1,12 @@
 ---
 layout:     post
-title:      "Deep into Spring Boot Actuator"
+title:      "Deep into Spring Boot Actuator Health Endpoint"
 subtitle:   ""
 date:       2021-09-28 00:19:00
 author:     "Echo Yuan"
 tags:
     - Spring Boot Actuator
+    - Health Endpoint
 ---
 Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依赖了它，应用就会自动加持`/actuator/health`，然后就可以给容器探测了。这一切看起来似乎是很简单很自然的事情，可你真的对它了解吗？本文就试图对这个Health Endpoint做一些深入的剖析。
 
