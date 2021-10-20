@@ -8,7 +8,7 @@ tags:
     - Spring Boot Actuator
     - Health Endpoint
 ---
-Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依赖了它，应用就会自动加持`/actuator/health`，然后就可以给容器环境探测了。这一切看起来似乎是很简单很自然的事情，可你真的对它了解吗？本文就试图对这个Health Endpoint做一些深入的剖析。
+Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依赖了它，应用就会自动加持`/actuator/health`，然后就可以交给容器环境来探测了。这一切看起来似乎是很简单很自然的事情，可你真的对它了解吗？本文就试图对这个Health Endpoint做一些深入的剖析。
 
 事情的起因也是日常工作中常见的问题套路。远程环境的某个服务之前一直好好的，最近却经常被k8s重启，排查后发现是`/actuator/health`超时了，而本地开发环境却依然秒回。接着挖，发现是应用要发邮件，所以依赖了`spring-boot-starter-mail`，而mail的测试账号是临时申请的126邮箱，跨国的网络通信导致`/actuator/health`不能如期返回。吃一堑、长一智，由表及里地对Actuator多一些了解也就提上了日程。
 
