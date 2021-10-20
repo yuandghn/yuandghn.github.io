@@ -208,7 +208,7 @@ management.endpoint.health.status.http-mapping.fatal=503
 ```
 也可以定义一个`HttpCodeStatusMapper`类型的bean来做下映射。
 
-单只配了http-mapping还不够，还要记得去调整一下`Health Status`严重程序的顺序，不然你的FATAL在Health Endpoint里仍然会被认作`200`的HTTP status code来返回，只要存在任意一个`UP`
+单只配了http-mapping还不够，还要记得去调整一下`Health Status`严重程度的顺序，不然你的FATAL在Health Endpoint里仍然会被认作`200`的HTTP status code来返回，当存在任意一个`UP`的情况下。
 
 ```
 management.endpoint.health.status.order=fatal,down,out-of-service,unknown,up
