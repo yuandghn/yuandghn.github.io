@@ -10,9 +10,9 @@ tags:
 ---
 Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依赖了它，应用就会自动加持`/actuator/health`，然后就可以给容器探测了。这一切看起来似乎是很简单很自然的事情，可你真的对它了解吗？本文就试图对这个Health Endpoint做一些深入的剖析。
 
-事情的起因也是日常工作中常见的“套路”。远程环境的某个服务之前一直好好的，最近却经常被k8s重启，排查后发现是`/actuator/health`超时了，而本地开发环境却依然秒回。接着挖，发现是应用要发邮件，所以依赖了`spring-boot-starter-mail`，而mail的测试账号是临时申请的126邮箱，跨国的网络通信使`/actuator/health`不能如期返回。
+事情的起因也是日常工作中常见的问题套路。远程环境的某个服务之前一直好好的，最近却经常被k8s重启，排查后发现是`/actuator/health`超时了，而本地开发环境却依然秒回。接着挖，发现是应用要发邮件，所以依赖了`spring-boot-starter-mail`，而mail的测试账号是临时申请的126邮箱，跨国的网络通信导致`/actuator/health`不能如期返回。吃一堑、长一智，由表及里地对Actuator多一些了解也就提上了日程。
 
-本文使用的Spring Boot Version: 2.3.9.RELEASE
+本文使用的Spring Boot版本为2.3.9.RELEASE。
 
 ### Endpoints
 先贴一段[官方文档](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/production-ready-features.html#production-ready)的描述
@@ -20,7 +20,7 @@ Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依
 
 > Each individual endpoint can be [enabled or disabled](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/production-ready-features.html#production-ready-endpoints-enabling-endpoints) and [exposed (made remotely accessible) over HTTP or JMX](exposed (made remotely accessible) over HTTP or JMX). An endpoint is considered to be available when it is both enabled and exposed. The built-in endpoints will only be auto-configured when they are available. Most applications choose exposure via HTTP, where the ID of the endpoint along with a prefix of `/actuator `is mapped to a URL. For example, by default, the `health` endpoint is mapped to `/actuator/health`.
 
-这段描述提纲挈领，使我们了解了Endpoint的关键操作：是否启用->是否暴露/暴露方式->如何触达。
+这段描述提纲挈领，使我们了解了Endpoint的关键操作：是否启用->是否暴露 & 暴露方式->如何触达。
 
 通过HTTP暴露的Endpoints默认只开了两个，`/actuator/health`和`/actuator/info`，所以`/actuator/beans`、`/actuator/env`之类的默认是不可触达的。本文不涉及JMX的暴露方式。
 
@@ -31,7 +31,7 @@ Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依
 |management.endpoints.web.exposure.include|[health, info]|Endpoint IDs that should be included or '*' for all.|
 
 ### Web Endpoints
-那都有哪些内置的Web Endpoints呢，Actuator贴心地提供了一个`discovery page`，默认情况下你可以通过`{contextPath}/actuator`来查看。
+通过HTTP方式暴露的Endpoints称作Web Endpoints，那都有哪些内置的Web Endpoints呢？Actuator贴心地提供了一个`discovery page`来告诉你，默认情况下你可以通过`{contextPath}/actuator`来查看。
 
 ```javascript
 {
@@ -63,7 +63,7 @@ Spring Boot Actuator现在已经几乎成为了应用的标配模块，只要依
 ```
 
 ### Health Information
-这个Health Endpoint就是本文重点讲述的对象。它的结果是对应用里所有已注册的HealthIndicators的结果的聚合，那既然是聚合的结果，可能会花费一些时间才能获得。
+Health Information是由Health这个Endpoint提供的，它也是本文重点讲述的对象。它的结果是对应用里所有已注册的HealthIndicators的结果的聚合，那既然是聚合的结果，可能会花费一些时间才能获得。
 
 Health Endpoint返回的信息繁简与否，取决于以下两个属性的配置
 
@@ -184,7 +184,7 @@ public class RandomHealthIndicator implements HealthIndicator {
 
 
 ### Health Status
-`Health Status`可以表示各个componets的健康状况以及由所有的components聚合而来的代表整个系统的健康状况。
+`Health Status`可以表示各个components的健康状况以及由所有的components聚合而来的代表整个系统的健康状况。
 
 框架预定义了以下几个`Health Status`和其对应的HTTP status code
 
@@ -216,9 +216,9 @@ management.endpoint.health.status.order=fatal,down,out-of-service,unknown,up
 Actuator的逻辑就是先把各个components的status收集起来，然后在这个status order列表里寻找下标最小的那个status，并将其http-mapping作为最终的HTTP status code。具体可参考`SimpleStatusAggregator`的源码。
 
 ### Measure Health Endpoint
-前面多次提到，Health Endpoint的结果是多个conponents的结果的聚合，所以它所花费的时间也是这些components顺序执行完所需时间之和。
+前面多次提到，Health Endpoint的结果是多个components的结果的聚合，所以它所花费的时间也是这些components顺序执行完所需时间之和。
 
-在Kubenates环境中，如果你的应用依赖了较多的components，且它们之中有的health check需要走网络，比如跨国/跨地区的mail服务，那么Health Endpoint有可能会超出容器探针所配置的策略值，进而影响应用的启动和运行。
+在Kubernetes环境中，如果你的应用依赖了较多的components，且它们之中有的health check需要走网络，比如跨国/跨地区的mail服务，那么Health Endpoint有可能会超出容器探针所配置的策略值，进而影响应用的启动和运行。
 
 作为实验目的，我们现在希望能对所有的components做一下耗时测量。
 
@@ -338,7 +338,7 @@ public abstract class AbstractHealthIndicator implements HealthIndicator {
 ```
 它封装了Health实例的创建和异常处理，相比之下，我们前面定义的`RandomHealthIndicator`表现的就有点儿差了。
 
-最后再来看一下MailHealthIndicator，也就是那个让我们的应用超时的“恐怖”分子
+最后再来看一下MailHealthIndicator，也就是那个让我们的应用超时的不安分因子
 ```java
 /**
  * {@link HealthIndicator} for configured smtp server(s).
@@ -364,6 +364,7 @@ public class MailHealthIndicator extends AbstractHealthIndicator {
 
 }
 ```
+`this.mailSender.testConnection()`是真的会走下网络连接。
 
 ### Kubernetes Probes
 为了让应用更适应容器化环境，Spring Boot从2.3起提供了开箱即用的[探针技术](https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-2.3-Release-Notes#liveness-and-readiness-probes)来暴露应用程序的可用性状态([Application Availability State](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/spring-boot-features.html#boot-features-application-availability))。
@@ -382,10 +383,12 @@ public class MailHealthIndicator extends AbstractHealthIndicator {
 
 如果你自定义了Health Indicator，那最好也给它加上`ConditionalOnEnabledHealthIndicator`注解，不然它就脱离`management.health.defaults.enabled: false`的控制了，这个[Unit Test](https://github.com/spring-projects/spring-boot/blob/2.3.x/spring-boot-project/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/health/HealthContributorAutoConfigurationTests.java)对此有所演示。
 
+以下是三个快速的Q&A。
+
 ##### Q1 - 应用是在本地直接起的，怎样可以使这两个Health Groups也可用？
 设置`management.endpoint.health.probes.enabled`为`true`
 ##### Q2 - 应用是怎样auto-detects到身处Kubernetes环境中的？
-其实很简单，文档请参考[cloud-deployment-kubernetes](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/deployment.html#cloud-deployment-kubernetes)，代码请参考`AvailabilityProbesAutoConfiguration`，在这里决定是否创建`livenessStateHealthIndicator`、`readinessStateHealthIndicator`以及两个Health Groups`liveness`、`readiness`，也是在这个地方(ProbesCondition)判断当前环境是不是Kubernetes的。
+其实很简单，文档请参考[cloud-deployment-kubernetes](https://docs.spring.io/spring-boot/docs/2.3.9.RELEASE/reference/html/deployment.html#cloud-deployment-kubernetes)，代码请参考`AvailabilityProbesAutoConfiguration`，就是在这里决定是否创建`livenessStateHealthIndicator`、`readinessStateHealthIndicator`以及两个Health Groups`liveness`、`readiness`，也是在这个地方(ProbesCondition)判断当前环境是不是Kubernetes的。
 ##### Q3 - 如何主动改变Application Availability State？
 在你的程序里可以使用`AvailabilityChangeEvent.publish`这个便捷的静态方法来发布新的availability state，只要拿到`ApplicationEventPublisher`Bean就行。
 
@@ -394,7 +397,9 @@ public class MailHealthIndicator extends AbstractHealthIndicator {
 ![intellij-idea-enable-JMX-agent](/img/in-post/spring-boos-actuator/intellij-idea-enable-JMX-agent.png)
 
 ### 结语
-本文并非对Actuator的全面介绍，只是抽取了一些最近阅读和思考中的片段。Actuator虽然看起来简单，可能就是依赖一引的事儿，不过如果能多了解一点儿内部的工作机制，对日常工作想必也是有帮助的。期待能抛砖引玉~
+Actuator虽然看起来简单，可能就是依赖一引的事儿，不过如果能多了解一点儿其内部的工作原理，对日常工作应该也是有帮助的。
+
+期待能抛砖引玉。
 
 ### 参考文档
 [https://www.baeldung.com/spring-boot-health-indicators](https://www.baeldung.com/spring-boot-health-indicators)
