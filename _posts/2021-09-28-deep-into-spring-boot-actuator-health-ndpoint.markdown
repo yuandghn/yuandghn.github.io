@@ -375,7 +375,7 @@ public class MailHealthIndicator extends AbstractHealthIndicator {
 
 依据官方的说明，使用`/actuator/health`作为probe并不是一个好的实践，前面我们也有讲它可能会变成一个较为耗时的操作，且受网络波动的影响你的应用也会变得时好时坏、难以捉摸。
 
-如果你仍然想继续用`/actuator/health`或者因为Spring Boot版本小于2.3.9，那么把`management.health.defaults.enabled`设置为`false`可能会是个好的选择，以此来保证`/actuator/health`的网络联通性但又不会去做任何health check的操作，这其实和你自己写一个空的`handler method`没什么区别。
+如果你仍然想继续用`/actuator/health`或者因为Spring Boot版本小于2.3.9，那么把`management.health.defaults.enabled`设置为`false`可能会是个好的选择，以此来保证`/actuator/health`的网络联通性但又不会去做任何实际的health check操作，这其实和你自己写一个空的`handler method`没什么区别。
 
 如果你还是想让它做一些实际的health check操作，但又希望把其中一些检查项排除在外，可以单独设置这些项的启用，比如`management.health.mail.enabled: false`。
 
@@ -383,7 +383,7 @@ public class MailHealthIndicator extends AbstractHealthIndicator {
 
 如果你自定义了Health Indicator，那最好也给它加上`ConditionalOnEnabledHealthIndicator`注解，不然它就脱离`management.health.defaults.enabled: false`的控制了，这个[Unit Test](https://github.com/spring-projects/spring-boot/blob/2.3.x/spring-boot-project/spring-boot-actuator-autoconfigure/src/test/java/org/springframework/boot/actuate/autoconfigure/health/HealthContributorAutoConfigurationTests.java)对此有所演示。
 
-以下是三个快速的Q&A。
+以下是三个快速的Q&A
 
 ##### Q1 - 应用是在本地直接起的，怎样可以使这两个Health Groups也可用？
 设置`management.endpoint.health.probes.enabled`为`true`
@@ -393,13 +393,11 @@ public class MailHealthIndicator extends AbstractHealthIndicator {
 在你的程序里可以使用`AvailabilityChangeEvent.publish`这个便捷的静态方法来发布新的availability state，只要拿到`ApplicationEventPublisher`Bean就行。
 
 ### JMX Tips
-如果你用IDEA在本地调试的过程中发现JMX Endpoint不知怎地被启用了，那可能是IDEA的锅
+如果你用Intellij IDEA在本地调试的过程中发现JMX Endpoint不知怎地被启用了，那可能是IDEA的锅
 ![intellij-idea-enable-JMX-agent](/img/in-post/spring-boos-actuator/intellij-idea-enable-JMX-agent.png)
 
 ### 结语
 Actuator虽然看起来简单，可能就是依赖一引的事儿，不过如果能多了解一点儿其内部的工作原理，对日常工作应该也是有帮助的。
-
-期待能抛砖引玉。
 
 ### 参考文档
 [https://www.baeldung.com/spring-boot-health-indicators](https://www.baeldung.com/spring-boot-health-indicators)
