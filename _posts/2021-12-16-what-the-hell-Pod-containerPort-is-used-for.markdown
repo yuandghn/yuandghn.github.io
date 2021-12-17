@@ -17,7 +17,7 @@ tags:
 
 先瞅一下[官方文档](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.21/#container-v1-core)里的描述 
 
-    List of ports to expose from the container. Exposing a port here gives the system additional information about the network connections a container uses, but is primarily informational. Not specifying a port here DOES NOT prevent that port from being exposed. Any port which is listening on the default "0.0.0.0" address inside a container will be accessible from the network. Cannot be updated.
+> List of ports to expose from the container. Exposing a port here gives the system additional information about the network connections a container uses, but is primarily informational. Not specifying a port here DOES NOT prevent that port from being exposed. Any port which is listening on the default "0.0.0.0" address inside a container will be accessible from the network. Cannot be updated.
 
 这句`but is primarily informational`很重要，表明它就是单纯地show给别人看的；
 
